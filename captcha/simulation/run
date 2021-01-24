@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# ASCII escape characters
+ascii_red=31
+ascii_green=32
+ascii_yellow=33
+ascii_esc="\u1B["
+
+# Colourful logging
+function print() {
+  if [[ -z "$2" ]]; then
+    color=$ascii_green
+  elif [[ "$2" == "1" ]]; then
+    color=$ascii_red
+  else
+    color=$ascii_yellow
+  fi
+  printf "${ascii_esc}${color}m${1}${ascii_esc}0m\r\n"
+}
+
+print "Start captcha generation of training set ..."
+printf "GET /captcha/?is_training=1&captcha_num=2500 HTTP/1.0\r\n\r\n" | nc localhost 80 1>/dev/null
+
+print "Start captcha generation of test set ..."
+printf "GET /captcha/?is_training=0&captcha_num=1000 HTTP/1.0\r\n\r\n" | nc localhost 80 1>/dev/null
+
+print "Captcha generation finished successfully."
+
+python3 simulation.py
+echo
+print "Simulation finished successfully."

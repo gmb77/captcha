@@ -1,0 +1,67 @@
+#!/bin/bash
+
+# ASCII escape characters
+ascii_red=31
+ascii_green=32
+ascii_yellow=33
+ascii_esc="\u1B["
+
+# Colourful logging
+function print() {
+  if [[ -z "$2" ]]; then
+    color=$ascii_green
+  elif [[ "$2" == "1" ]]; then
+    color=$ascii_red
+  else
+    color=$ascii_yellow
+  fi
+  printf "${ascii_esc}${color}m${1}${ascii_esc}0m\r\n"
+}
+
+# Set script's variables
+src=$(basename "$PWD")
+pub=/var/www/html
+dest=$pub/$src
+dir=simulation
+cwd=$dest/$dir
+if [[ -z "$SUDO_USER" ]]; then
+  user=$USER
+else
+  user=$SUDO_USER
+fi
+
+# Check if already installed
+if [[ -d "$dest" ]]; then
+  print "Folder $dest exists, seems it is already installed." 2
+  printf "Would you like to remove that folder and reinstall it? (y|n) : "
+  read -r -n 1 -t 10 choice || choice=n
+  if [[ -n "$choice" ]]; then echo; fi
+  if [[ "$choice" =~ ^(y|Y)$ ]]; then
+    sudo rm -r "$dest"
+    echo
+  else
+    print "Installation process finished without changes." 2
+    exit 1
+  fi
+fi
+
+print "Start dependency fetching ..."
+gnome-terminal --wait -e 'bash -c "echo Start dependency fetching ...; echo You could be asked for root password.; sudo add-apt-repository multiverse -y; sudo apt install php-gd php python3-pip -y; pip3 install launchpadlib -r '"$src/$dir"'/requirements.txt; sleep 3"' 2>/dev/null
+
+print "Start installation configuration ..."
+sudo adduser www-data "$user" 1>/dev/null
+sudo rsync -r --chmod=640 "$src" "$pub"
+sudo chown -R "$user":"$user" "$dest"
+sudo chmod 770 "$dest"
+chmod ug+x "$dest"/*/
+chmod u+x "$cwd"/run "$cwd"/"$dir".py
+sudo service apache2 restart
+print "Sources copied into folder $dest."
+
+echo
+print "Installation process finished successfully."
+echo
+print "You can start simulation with next commands:" 2
+echo
+print "pushd $cwd" 2
+print "./run" 2

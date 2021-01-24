@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# ASCII escape characters
+ascii_red=31
+ascii_green=32
+ascii_yellow=33
+ascii_esc="\u1B["
+
+# Colourful logging
+function print() {
+  if [[ -z "$2" ]]; then
+    color=$ascii_green
+  elif [[ "$2" == "1" ]]; then
+    color=$ascii_red
+  else
+    color=$ascii_yellow
+  fi
+  printf "${ascii_esc}${color}m${1}${ascii_esc}0m\r\n"
+}
+
+# Set script's variables
+src=$(basename "$PWD")
+pub=/var/www/html
+dest=$pub/$src
+
+# Check if already installed
+if [[ -d "$dest" ]]; then
+  printf "Would you like to remove $dest? (y|n) : "
+  read -r -n 1 -t 10 choice || choice=n
+  if [[ -n "$choice" ]]; then echo; fi
+  if [[ "$choice" =~ ^(y|Y)$ ]]; then
+    sudo rm -r "$dest"
+    print "Uninstallation process finished successfully."
+  else
+    print "Uninstallation process finished without changes."
+  fi
+else
+  print "Installation folder is not found." 2
+  exit 1
+fi
