@@ -40,8 +40,8 @@ if [[ -d "$dest" ]]; then
     sudo rm -r "$dest"
     echo
   else
-    print "Installation process finished without changes." 2
-    exit 1
+    print "Installation process finished without any changes."
+    exit
   fi
 fi
 

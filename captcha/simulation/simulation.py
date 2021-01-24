@@ -25,7 +25,7 @@ test_dirs = {
 }
 
 print()
-print("Training and test sets' preprocessing")
+print("Preprocess training and test sets")
 # Preprocess train and test sets: save extracted letters, handle not recognised (ignored) images
 process_set(train_dirs)
 process_set(test_dirs)
@@ -59,7 +59,7 @@ model = ker.models.load_model(model_file)
 print()
 print("Statistical validation:")
 # Test set predictions (batch mode)
-do_prediction(test_dirs["images"], model, labels, (20, 20), batch_size=256)
+do_validation(test_dirs["images"], model, labels, (20, 20), batch_size=256)
 
 print()
 print("Captcha solving:")

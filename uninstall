@@ -32,7 +32,7 @@ if [[ -d "$dest" ]]; then
     sudo rm -r "$dest"
     print "Uninstallation process finished successfully."
   else
-    print "Uninstallation process finished without changes."
+    print "Uninstallation process finished without any changes."
   fi
 else
   print "Installation folder is not found." 2
